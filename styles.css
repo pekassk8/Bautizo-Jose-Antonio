@@ -1,0 +1,116 @@
+/* ===== Estilos del bautizo de José Antonio ===== */
+
+:root {
+  --color-fondo: #f4f3f7;
+  --color-texto: #6b6458;
+  --color-acento: #b5a98f;
+  --color-tarjeta: #ffffff;
+  --sombra: 0 8px 28px rgba(120, 110, 95, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Encabezado ===== */
+.hero {
+  text-align: center;
+  padding: 56px 20px 36px;
+}
+
+.hero-doves {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.dove {
+  font-size: 1.8rem;
+  opacity: 0.8;
+}
+
+.hero h1 {
+  font-size: clamp(2.4rem, 8vw, 4rem);
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--color-texto);
+}
+
+.hero-subtitle {
+  margin-top: 14px;
+  font-size: 1.05rem;
+  color: var(--color-acento);
+}
+
+.hero-date {
+  margin-top: 6px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* ===== Galería de imágenes ===== */
+.gallery {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 10px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.card {
+  background: var(--color-tarjeta);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--sombra);
+  text-align: center;
+}
+
+.card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ===== Botón de ubicación ===== */
+.map-button {
+  display: inline-block;
+  margin: 18px auto 24px;
+  padding: 12px 26px;
+  background: var(--color-acento);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.map-button:hover {
+  background: #9d9079;
+  transform: translateY(-2px);
+}
+
+/* ===== Pie de página ===== */
+.footer {
+  text-align: center;
+  padding: 30px 20px 50px;
+  color: var(--color-acento);
+  font-size: 1.05rem;
+}
+
+.footer strong {
+  color: var(--color-texto);
+}
