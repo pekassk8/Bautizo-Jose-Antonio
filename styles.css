@@ -1,11 +1,13 @@
-/* ===== Estilos del bautizo de José Antonio ===== */
+/* ===== Bautizo de José Antonio ===== */
 
 :root {
-  --color-fondo: #f4f3f7;
-  --color-texto: #6b6458;
-  --color-acento: #b5a98f;
-  --color-tarjeta: #ffffff;
-  --sombra: 0 8px 28px rgba(120, 110, 95, 0.14);
+  --paper: #f5f4f7;
+  --ink: #6f6857;
+  --ink-soft: #8c8472;
+  --gold: #b7a98c;
+  --gold-deep: #9c8e72;
+  --card: #ffffff;
+  --card-shadow: 0 12px 34px rgba(120, 110, 90, 0.13);
 }
 
 * {
@@ -15,102 +17,315 @@
 }
 
 body {
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  background: var(--color-fondo);
-  color: var(--color-texto);
-  line-height: 1.6;
+  font-family: "Quicksand", "Segoe UI", sans-serif;
+  color: var(--ink);
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  /* Fondo tipo papel acuarela */
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.9), transparent 55%),
+    radial-gradient(circle at 85% 88%, rgba(228, 224, 235, 0.7), transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-attachment: fixed;
 }
 
-/* ===== Encabezado ===== */
+main {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 0 22px;
+}
+
+/* ===== Portada ===== */
 .hero {
   text-align: center;
-  padding: 56px 20px 36px;
+  padding: 64px 22px 30px;
+  max-width: 660px;
+  margin: 0 auto;
 }
 
-.hero-doves {
+.intro {
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.3px;
+  max-width: 26ch;
+  margin: 0 auto;
+}
+
+.name-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
+  margin: 6px 0 4px;
+}
+
+.name {
+  font-family: "Great Vibes", cursive;
+  font-weight: 400;
+  font-size: clamp(3.4rem, 13vw, 5.6rem);
+  line-height: 1.1;
+  color: var(--ink);
 }
 
 .dove {
-  font-size: 1.8rem;
-  opacity: 0.8;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  filter: sepia(0.35) opacity(0.7);
 }
-
-.hero h1 {
-  font-size: clamp(2.4rem, 8vw, 4rem);
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: var(--color-texto);
-}
-
-.hero-subtitle {
-  margin-top: 14px;
-  font-size: 1.05rem;
-  color: var(--color-acento);
+.dove-flip {
+  transform: scaleX(-1);
 }
 
 .hero-date {
-  margin-top: 6px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-top: 6px;
 }
 
-/* ===== Galería de imágenes ===== */
-.gallery {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 10px 16px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
+/* ===== Detalles ===== */
+.details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 16px;
+  margin: 22px auto 10px;
 }
 
-.card {
-  background: var(--color-tarjeta);
+.detail {
+  background: var(--card);
   border-radius: 18px;
-  overflow: hidden;
-  box-shadow: var(--sombra);
+  box-shadow: var(--card-shadow);
+  padding: 26px 14px 22px;
   text-align: center;
 }
 
-.card img {
-  display: block;
+.icon {
+  display: inline-block;
+  width: 52px;
+  height: 52px;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.icon svg {
   width: 100%;
-  height: auto;
+  height: 100%;
 }
 
-/* ===== Botón de ubicación ===== */
-.map-button {
+.detail-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.detail-sub {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+/* Tarjeta de detalle que es enlace a un mapa */
+.detail-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.detail-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 38px rgba(120, 110, 90, 0.2);
+}
+.detail-hint {
   display: inline-block;
-  margin: 18px auto 24px;
-  padding: 12px 26px;
-  background: var(--color-acento);
+  margin-top: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gold-deep);
+  letter-spacing: 0.3px;
+}
+
+/* ===== Ornamento divisor ===== */
+.ornament {
+  text-align: center;
+  color: var(--gold);
+  font-size: 1rem;
+  letter-spacing: 8px;
+  margin: 40px 0;
+  opacity: 0.8;
+}
+
+/* ===== Bloques de texto (padres, padrinos, ubicación) ===== */
+.block-title {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 600;
+  font-size: 1.8rem;
+  color: var(--gold-deep);
+  text-align: center;
+  margin-bottom: 14px;
+}
+.block-title-pad {
+  margin-top: 38px;
+}
+
+.people {
+  text-align: center;
+}
+.people-name {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.35rem;
+  color: var(--ink);
+  margin: 4px 0;
+}
+.people-amp {
+  font-family: "Great Vibes", cursive;
+  font-size: 1.6rem;
+  color: var(--gold);
+  margin: 2px 0;
+}
+
+/* ===== Ubicaciones ===== */
+.location {
+  text-align: center;
+}
+.loc {
+  margin-bottom: 32px;
+}
+.loc:last-child {
+  margin-bottom: 0;
+}
+.location-name {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.45rem;
+  color: var(--ink);
+}
+.location-sub {
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+}
+
+.map-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 28px;
+  background: var(--gold);
   color: #fff;
   text-decoration: none;
   border-radius: 999px;
-  font-size: 1rem;
   font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 8px 20px rgba(160, 145, 115, 0.35);
   transition: transform 0.15s ease, background 0.15s ease;
 }
-
+.map-button svg {
+  width: 20px;
+  height: 20px;
+}
 .map-button:hover {
-  background: #9d9079;
+  background: var(--gold-deep);
   transform: translateY(-2px);
 }
 
-/* ===== Pie de página ===== */
-.footer {
+/* ===== Mesa de regalos ===== */
+.gift {
+  background: var(--card);
+  border-radius: 22px;
+  box-shadow: var(--card-shadow);
+  padding: 34px 24px 32px;
   text-align: center;
-  padding: 30px 20px 50px;
-  color: var(--color-acento);
-  font-size: 1.05rem;
+}
+.gift-icon {
+  display: inline-block;
+  width: 56px;
+  height: 56px;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.gift-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.gift-block {
+  margin-top: 20px;
+}
+.gift-label {
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.gift-value {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.3rem;
+  color: var(--ink);
+  margin-top: 2px;
+}
+.gift-number {
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--ink);
+  margin-top: 4px;
 }
 
-.footer strong {
-  color: var(--color-texto);
+.copy-btn {
+  margin-top: 10px;
+  padding: 8px 20px;
+  border: 1.5px solid var(--gold);
+  background: transparent;
+  color: var(--gold-deep);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.copy-btn:hover {
+  background: var(--gold);
+  color: #fff;
+}
+.copy-btn.copiado {
+  background: #8fae87;
+  border-color: #8fae87;
+  color: #fff;
+}
+
+/* ===== Pie ===== */
+.footer {
+  text-align: center;
+  padding: 46px 22px 60px;
+  color: var(--ink-soft);
+}
+.footer .dove {
+  display: block;
+  margin-bottom: 8px;
+}
+.footer-family {
+  font-family: "Great Vibes", cursive;
+  font-size: 2rem;
+  color: var(--ink);
+  margin-top: 2px;
+}
+
+/* ===== Animación de aparición ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
