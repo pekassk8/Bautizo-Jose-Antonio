@@ -352,7 +352,18 @@ main {
   font-weight: 600;
 }
 .field select option {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+}
+/* Campo de cantidad: grande y de ancho completo */
+#rsvp-personas {
+  width: 100%;
+  font-size: 1.9rem;
+  font-weight: 700;
+  padding: 18px 20px;
+  padding-right: 46px;
+  text-align: left;
+  background-position: right 18px center;
+  background-size: 20px 20px;
 }
 .field input:focus,
 .field select:focus {
