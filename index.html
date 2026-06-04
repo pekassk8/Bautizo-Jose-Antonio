@@ -14,13 +14,35 @@
 </head>
 <body>
 
-  <!-- ===== Portada: invitación original completa ===== -->
+  <!-- ===== Aviso superior (10 s) ===== -->
+  <div id="top-cta" class="top-cta" hidden>
+    <button type="button" class="top-cta-btn" id="top-cta-btn">✨ ¡CONFIRMAR ASISTENCIA! ✨</button>
+    <button type="button" class="top-cta-close" id="top-cta-close" aria-label="Cerrar">×</button>
+  </div>
+
+  <!-- ===== Música ===== -->
+  <audio id="bg-music" src="assets/musica.wav" loop preload="auto"></audio>
+  <button type="button" id="music-toggle" class="music-toggle" aria-label="Activar o silenciar música">🎵</button>
+
+  <!-- ===== Portada: invitación original ===== -->
   <header class="hero reveal">
     <img class="invitacion" src="images/1-detalles.jpeg"
          alt="Estamos muy felices de invitarlos al bautizo de José Antonio. El 27 de junio de 2026, 11 AM, Villa de Guadalupe. Recepción en Margaritas Cholul a la 1:30 PM. Familia Farah Cervera." />
   </header>
 
   <main>
+
+    <!-- ===== Cuenta regresiva ===== -->
+    <section class="countdown reveal" id="countdown">
+      <p class="cd-label">Faltan para el bautizo</p>
+      <div class="cd-grid" id="cd-grid">
+        <div class="cd-item"><span class="cd-num" id="cd-dias">--</span><span class="cd-unit">días</span></div>
+        <div class="cd-item"><span class="cd-num" id="cd-horas">--</span><span class="cd-unit">horas</span></div>
+        <div class="cd-item"><span class="cd-num" id="cd-min">--</span><span class="cd-unit">min</span></div>
+        <div class="cd-item"><span class="cd-num" id="cd-seg">--</span><span class="cd-unit">seg</span></div>
+      </div>
+      <p class="cd-final" id="cd-final" hidden></p>
+    </section>
 
     <div class="ornament reveal" aria-hidden="true">✦</div>
 
@@ -100,12 +122,23 @@
         <p class="gift-number">058597000024422857</p>
         <button class="copy-btn" type="button" onclick="copiar('058597000024422857', this)">Copiar cuenta</button>
       </div>
+
+      <div class="gift-block pay-block">
+        <p class="gift-label">O paga en línea con tarjeta</p>
+        <div class="pay-grid">
+          <a class="pay-btn" href="https://pago.clip.mx/v3/22935e50-c5b5-4dbd-8c3d-03059c264c3c" target="_blank" rel="noopener">$100</a>
+          <a class="pay-btn" href="https://pago.clip.mx/v3/6c2e1e63-6dca-421d-8a81-3687c3490253" target="_blank" rel="noopener">$200</a>
+          <a class="pay-btn" href="https://pago.clip.mx/v3/8dc8aef8-e6b5-4314-b516-ea1b8cfcfdbb" target="_blank" rel="noopener">$500</a>
+          <a class="pay-btn" href="https://pago.clip.mx/v3/f457c7cc-48f9-4c31-9a4c-543da6701cf3" target="_blank" rel="noopener">$1,000</a>
+        </div>
+        <a class="pay-btn pay-other" href="https://linkdenegocio.mx/%40bautizojoseA/pagar" target="_blank" rel="noopener">Otra cantidad</a>
+      </div>
     </section>
 
     <div class="ornament reveal" aria-hidden="true">✦</div>
 
     <!-- ===== Confirmar asistencia (RSVP) ===== -->
-    <section class="rsvp reveal">
+    <section class="rsvp reveal" id="rsvp">
       <h2 class="block-title">Confirma tu asistencia</h2>
       <p class="rsvp-intro">Nos encantaría contar contigo 🕊️</p>
 
@@ -117,15 +150,18 @@
 
         <label class="field">
           <span class="field-label">¿Cuántas personas asisten?</span>
-          <input type="number" id="rsvp-personas" min="1" max="20" value="1" inputmode="numeric" />
+          <input type="number" id="rsvp-personas" min="1" max="10" value="1" inputmode="numeric" />
         </label>
+
+        <div id="acomp-fields"></div>
 
         <label class="field">
           <span class="field-label">Mensaje (opcional)</span>
           <input type="text" id="rsvp-mensaje" maxlength="200" placeholder="Un mensaje para la familia" />
         </label>
 
-        <button type="submit" class="btn-primary" id="rsvp-submit">Confirmar asistencia</button>
+        <button type="submit" class="btn-primary" id="rsvp-submit">Sí, asistiré 🎉</button>
+        <button type="button" class="btn-decline" id="rsvp-decline">No podré asistir 🙏</button>
       </form>
 
       <p id="rsvp-status" class="rsvp-status" role="status" aria-live="polite"></p>
@@ -139,6 +175,15 @@
   <footer class="footer reveal">
     <p class="footer-family">Familia Farah Cervera</p>
   </footer>
+
+  <!-- ===== Popup de agradecimiento ===== -->
+  <div id="thanks-overlay" class="overlay" hidden>
+    <div class="modal thanks-modal" role="dialog" aria-modal="true">
+      <button class="modal-close" id="thanks-close" aria-label="Cerrar">×</button>
+      <div class="thanks-emoji" id="thanks-emoji">🎉</div>
+      <p class="thanks-text" id="thanks-text"></p>
+    </div>
+  </div>
 
   <!-- ===== Ventana privada: lista de invitados ===== -->
   <div id="overlay" class="overlay" hidden>
@@ -154,7 +199,7 @@
       </div>
 
       <div id="list-step" hidden>
-        <h3 class="modal-title">Invitados confirmados</h3>
+        <h3 class="modal-title">Invitados</h3>
         <p id="list-total" class="list-total"></p>
         <ul id="list-ul" class="list-ul"></ul>
       </div>
@@ -163,78 +208,135 @@
 
   <script src="config.js"></script>
   <script>
-    // Copiar datos bancarios al portapapeles
+    // ====== Copiar datos bancarios ======
     function copiar(texto, btn) {
       const exito = () => {
         const original = btn.dataset.original || btn.textContent;
         btn.dataset.original = original;
         btn.textContent = '¡Copiado! ✓';
         btn.classList.add('copiado');
-        setTimeout(() => {
-          btn.textContent = original;
-          btn.classList.remove('copiado');
-        }, 1800);
+        setTimeout(() => { btn.textContent = original; btn.classList.remove('copiado'); }, 1800);
       };
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(texto).then(exito).catch(() => fallback(texto, exito));
-      } else {
-        fallback(texto, exito);
-      }
+        navigator.clipboard.writeText(texto).then(exito).catch(() => fallbackCopy(texto, exito));
+      } else { fallbackCopy(texto, exito); }
     }
-    function fallback(texto, cb) {
+    function fallbackCopy(texto, cb) {
       const t = document.createElement('textarea');
-      t.value = texto;
-      t.style.position = 'fixed';
-      t.style.opacity = '0';
-      document.body.appendChild(t);
-      t.select();
+      t.value = texto; t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select();
       try { document.execCommand('copy'); cb(); } catch (e) {}
       document.body.removeChild(t);
     }
 
-    // ===== Confirmar asistencia (RSVP) =====
-    const ENDPOINT = window.RSVP_ENDPOINT || '';
-    // Candado del código de acceso (SHA-256 de "1326"). El código no aparece en el código fuente.
-    const CODIGO_HASH = '32718321fcedd1bcfbef86cac61aa50938668428fddd0e5810c97b3574f2e070';
+    // ====== Cuenta regresiva ======
+    const objetivo = new Date(2026, 5, 27, 11, 0, 0).getTime(); // 27 jun 2026, 11:00
+    function tick() {
+      const ahora = Date.now();
+      let dif = objetivo - ahora;
+      const grid = document.getElementById('cd-grid');
+      const final = document.getElementById('cd-final');
+      if (dif <= 0) {
+        const fin = new Date(2026, 5, 27, 23, 59, 59).getTime();
+        grid.style.display = 'none';
+        final.hidden = false;
+        final.textContent = (ahora <= fin) ? '¡Hoy es el gran día! 🎉' : '¡Gracias por acompañarnos! 🕊️';
+        return;
+      }
+      const d = Math.floor(dif / 86400000); dif -= d * 86400000;
+      const h = Math.floor(dif / 3600000); dif -= h * 3600000;
+      const m = Math.floor(dif / 60000); dif -= m * 60000;
+      const s = Math.floor(dif / 1000);
+      document.getElementById('cd-dias').textContent = d;
+      document.getElementById('cd-horas').textContent = String(h).padStart(2, '0');
+      document.getElementById('cd-min').textContent = String(m).padStart(2, '0');
+      document.getElementById('cd-seg').textContent = String(s).padStart(2, '0');
+    }
+    tick(); setInterval(tick, 1000);
 
+    // ====== Campos dinámicos de acompañantes ======
+    const personasInput = document.getElementById('rsvp-personas');
+    const acompWrap = document.getElementById('acomp-fields');
+    const ordinales = ['', '', 'segunda', 'tercera', 'cuarta', 'quinta', 'sexta', 'séptima', 'octava', 'novena', 'décima'];
+    function renderAcomp() {
+      const n = Math.max(1, Math.min(10, parseInt(personasInput.value, 10) || 1));
+      acompWrap.innerHTML = '';
+      for (let i = 2; i <= n; i++) {
+        const lab = document.createElement('label'); lab.className = 'field';
+        const sp = document.createElement('span'); sp.className = 'field-label';
+        sp.textContent = 'Nombre de la ' + (ordinales[i] || (i + 'ª')) + ' persona';
+        const inp = document.createElement('input');
+        inp.type = 'text'; inp.maxLength = 80; inp.className = 'acomp-input'; inp.placeholder = 'Nombre';
+        lab.appendChild(sp); lab.appendChild(inp); acompWrap.appendChild(lab);
+      }
+    }
+    personasInput.addEventListener('input', renderAcomp);
+
+    // ====== Confirmar asistencia (RSVP) ======
+    const ENDPOINT = window.RSVP_ENDPOINT || '';
+    const CODIGO_HASH = '32718321fcedd1bcfbef86cac61aa50938668428fddd0e5810c97b3574f2e070';
     const form = document.getElementById('rsvp-form');
     const statusEl = document.getElementById('rsvp-status');
+    const btnSi = document.getElementById('rsvp-submit');
+    const btnNo = document.getElementById('rsvp-decline');
 
-    form.addEventListener('submit', function (ev) {
-      ev.preventDefault();
+    form.addEventListener('submit', function (ev) { ev.preventDefault(); enviar('Sí'); });
+    btnNo.addEventListener('click', function () { enviar('No'); });
+
+    function enviar(asistencia) {
       const nombre = document.getElementById('rsvp-nombre').value.trim();
-      const personas = document.getElementById('rsvp-personas').value || 1;
       const mensaje = document.getElementById('rsvp-mensaje').value.trim();
-      if (!nombre) return;
+      if (!nombre) { document.getElementById('rsvp-nombre').focus(); return; }
       if (!ENDPOINT) {
         statusEl.textContent = 'El formulario aún no está disponible. Inténtalo más tarde 🙏';
         statusEl.className = 'rsvp-status err';
         return;
       }
-      const btn = document.getElementById('rsvp-submit');
-      btn.disabled = true;
-      statusEl.textContent = 'Enviando…';
-      statusEl.className = 'rsvp-status';
+      let personas = 0, acompanantes = '';
+      if (asistencia === 'Sí') {
+        personas = Math.max(1, Math.min(10, parseInt(personasInput.value, 10) || 1));
+        const nombres = Array.prototype.slice.call(document.querySelectorAll('.acomp-input'))
+          .map(function (i) { return i.value.trim(); }).filter(Boolean);
+        acompanantes = nombres.join(', ');
+      }
+      btnSi.disabled = true; btnNo.disabled = true;
+      statusEl.textContent = 'Enviando…'; statusEl.className = 'rsvp-status';
 
       fetch(ENDPOINT, {
-        method: 'POST',
-        mode: 'no-cors',
+        method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ nombre: nombre, personas: personas, mensaje: mensaje })
+        body: JSON.stringify({ nombre: nombre, asistencia: asistencia, personas: personas, acompanantes: acompanantes, mensaje: mensaje })
       }).then(function () {
-        statusEl.textContent = '¡Gracias, ' + nombre.split(' ')[0] + '! Tu asistencia quedó confirmada 🎉';
-        statusEl.className = 'rsvp-status ok';
-        form.reset();
-        document.getElementById('rsvp-personas').value = 1;
+        statusEl.textContent = '';
+        mostrarThanks(asistencia, nombre);
+        form.reset(); personasInput.value = 1; renderAcomp();
       }).catch(function () {
         statusEl.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.';
         statusEl.className = 'rsvp-status err';
       }).finally(function () {
-        btn.disabled = false;
+        btnSi.disabled = false; btnNo.disabled = false;
       });
-    });
+    }
 
-    // ----- Ventana privada "Ver invitados" -----
+    // ====== Popup de agradecimiento ======
+    const thanksOverlay = document.getElementById('thanks-overlay');
+    function mostrarThanks(asistencia, nombre) {
+      const first = nombre.split(' ')[0];
+      const emoji = document.getElementById('thanks-emoji');
+      const txt = document.getElementById('thanks-text');
+      if (asistencia === 'No') {
+        emoji.textContent = '🙏';
+        txt.textContent = '¡Gracias por avisar, ' + first + '! Te vamos a extrañar.';
+      } else {
+        emoji.textContent = '🎉';
+        txt.textContent = '¡Gracias, ' + first + '! Tu asistencia quedó confirmada.';
+      }
+      thanksOverlay.hidden = false;
+    }
+    document.getElementById('thanks-close').addEventListener('click', function () { thanksOverlay.hidden = true; });
+    thanksOverlay.addEventListener('click', function (e) { if (e.target === thanksOverlay) thanksOverlay.hidden = true; });
+
+    // ====== Ventana privada "Ver invitados" ======
     const overlay = document.getElementById('overlay');
     const passStep = document.getElementById('pass-step');
     const listStep = document.getElementById('list-step');
@@ -242,15 +344,12 @@
     const passError = document.getElementById('pass-error');
 
     function abrirOverlay() {
-      passStep.hidden = false;
-      listStep.hidden = true;
-      passError.textContent = '';
-      passInput.value = '';
+      passStep.hidden = false; listStep.hidden = true;
+      passError.textContent = ''; passInput.value = '';
       overlay.hidden = false;
       setTimeout(function () { passInput.focus(); }, 50);
     }
     function cerrarOverlay() { overlay.hidden = true; }
-
     document.getElementById('ver-invitados-btn').addEventListener('click', abrirOverlay);
     document.getElementById('modal-close').addEventListener('click', cerrarOverlay);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) cerrarOverlay(); });
@@ -259,21 +358,15 @@
       const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
       return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
     }
-
     document.getElementById('pass-submit').addEventListener('click', verificarCodigo);
     passInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') verificarCodigo(); });
-
     async function verificarCodigo() {
       passError.textContent = '';
       const intento = passInput.value.trim();
       if (!intento) return;
-      let hash;
-      try { hash = await sha256Hex(intento); } catch (e) { hash = ''; }
-      if (hash !== CODIGO_HASH) {
-        passError.textContent = 'Código incorrecto.';
-        passInput.value = '';
-        return;
-      }
+      let hash = '';
+      try { hash = await sha256Hex(intento); } catch (e) {}
+      if (hash !== CODIGO_HASH) { passError.textContent = 'Código incorrecto.'; passInput.value = ''; return; }
       mostrarLista();
     }
 
@@ -282,11 +375,7 @@
         if (!ENDPOINT) return reject('no-config');
         const cb = 'cb_' + Date.now();
         const s = document.createElement('script');
-        window[cb] = function (data) {
-          try { delete window[cb]; } catch (e) {}
-          s.remove();
-          resolve(data);
-        };
+        window[cb] = function (data) { try { delete window[cb]; } catch (e) {} s.remove(); resolve(data); };
         s.onerror = function () { s.remove(); reject('error'); };
         s.src = ENDPOINT + '?callback=' + cb + '&t=' + Date.now();
         document.body.appendChild(s);
@@ -294,58 +383,80 @@
     }
 
     async function mostrarLista() {
-      passStep.hidden = true;
-      listStep.hidden = false;
+      passStep.hidden = true; listStep.hidden = false;
       const totalEl = document.getElementById('list-total');
       const ul = document.getElementById('list-ul');
-      totalEl.textContent = 'Cargando…';
-      ul.innerHTML = '';
+      totalEl.textContent = 'Cargando…'; ul.innerHTML = '';
       try {
         const data = await cargarInvitados();
         const inv = (data && data.invitados) || [];
-        if (!inv.length) {
-          totalEl.textContent = 'Aún no hay confirmaciones.';
-          return;
-        }
-        let totalPersonas = 0;
-        inv.forEach(function (g) {
-          totalPersonas += Number(g.personas) || 1;
+        if (!inv.length) { totalEl.textContent = 'Aún no hay confirmaciones.'; return; }
+        const si = inv.filter(function (g) { return String(g.asistencia || 'Sí') !== 'No'; });
+        const no = inv.filter(function (g) { return String(g.asistencia || 'Sí') === 'No'; });
+        let totalP = 0; si.forEach(function (g) { totalP += Number(g.personas) || 1; });
+        totalEl.textContent = si.length + ' confirmados · ' + totalP + ' personas' + (no.length ? '  ·  ' + no.length + ' no asistirán' : '');
+
+        function pinta(g, decline) {
           const li = document.createElement('li');
-          const n = document.createElement('span');
-          n.className = 'li-nombre';
-          n.textContent = g.nombre || '(sin nombre)';
-          const p = document.createElement('span');
-          p.className = 'li-personas';
-          p.textContent = (Number(g.personas) || 1) + (Number(g.personas) === 1 ? ' persona' : ' personas');
+          const n = document.createElement('span'); n.className = 'li-nombre'; n.textContent = g.nombre || '(sin nombre)';
           li.appendChild(n);
-          li.appendChild(p);
-          if (g.mensaje) {
-            const m = document.createElement('span');
-            m.className = 'li-mensaje';
-            m.textContent = '“' + g.mensaje + '”';
-            li.appendChild(m);
+          const p = document.createElement('span'); p.className = 'li-personas';
+          if (decline) { p.textContent = 'No asistirá'; }
+          else {
+            const np = Number(g.personas) || 1;
+            p.textContent = np + (np === 1 ? ' persona' : ' personas');
+            if (g.acompanantes) p.textContent += ' · con: ' + g.acompanantes;
           }
+          li.appendChild(p);
+          if (g.mensaje) { const m = document.createElement('span'); m.className = 'li-mensaje'; m.textContent = '“' + g.mensaje + '”'; li.appendChild(m); }
           ul.appendChild(li);
-        });
-        totalEl.textContent = inv.length + ' confirmaciones · ' + totalPersonas + ' personas en total';
+        }
+        si.forEach(function (g) { pinta(g, false); });
+        no.forEach(function (g) { pinta(g, true); });
       } catch (e) {
-        totalEl.textContent = (e === 'no-config')
-          ? 'El formulario aún no está configurado.'
-          : 'No se pudo cargar la lista. Inténtalo de nuevo.';
+        totalEl.textContent = (e === 'no-config') ? 'El formulario aún no está configurado.' : 'No se pudo cargar la lista. Inténtalo de nuevo.';
       }
     }
 
-    // Aparición suave al hacer scroll
+    // ====== Aviso superior (10 s) ======
+    const cta = document.getElementById('top-cta');
+    function cerrarCta() { cta.classList.add('hide'); setTimeout(function () { cta.hidden = true; }, 500); }
+    window.addEventListener('load', function () {
+      cta.hidden = false;
+      setTimeout(cerrarCta, 10000);
+    });
+    document.getElementById('top-cta-btn').addEventListener('click', function () {
+      document.getElementById('rsvp').scrollIntoView({ behavior: 'smooth' });
+      cerrarCta();
+    });
+    document.getElementById('top-cta-close').addEventListener('click', function (e) { e.stopPropagation(); cerrarCta(); });
+
+    // ====== Música ======
+    const music = document.getElementById('bg-music');
+    music.volume = 0.35;
+    const musicBtn = document.getElementById('music-toggle');
+    function setMusicIcon() { musicBtn.textContent = music.paused ? '🔇' : '🎵'; }
+    function quitarAuto() { ['click', 'touchstart', 'keydown'].forEach(function (ev) { window.removeEventListener(ev, autoPlay); }); }
+    function autoPlay() { music.play().then(function () { setMusicIcon(); quitarAuto(); }).catch(function () {}); }
+    window.addEventListener('load', function () {
+      music.play().then(setMusicIcon).catch(function () {
+        ['click', 'touchstart', 'keydown'].forEach(function (ev) { window.addEventListener(ev, autoPlay, { passive: true }); });
+      });
+    });
+    musicBtn.addEventListener('click', function () {
+      if (music.paused) { music.play(); } else { music.pause(); }
+      setMusicIcon(); quitarAuto();
+    });
+
+    // ====== Aparición al hacer scroll ======
     const reveals = document.querySelectorAll('.reveal');
     if ('IntersectionObserver' in window) {
-      const obs = new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
-        });
+      const obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
       }, { threshold: 0.12 });
-      reveals.forEach((el) => obs.observe(el));
+      reveals.forEach(function (el) { obs.observe(el); });
     } else {
-      reveals.forEach((el) => el.classList.add('visible'));
+      reveals.forEach(function (el) { el.classList.add('visible'); });
     }
   </script>
 

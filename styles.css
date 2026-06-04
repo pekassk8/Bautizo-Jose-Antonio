@@ -29,6 +29,115 @@ main {
   padding: 0 22px;
 }
 
+/* ===== Aviso superior (CTA) ===== */
+.top-cta {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #b7a98c, #9c8e72);
+  box-shadow: 0 4px 16px rgba(120, 110, 90, 0.3);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.top-cta.hide {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+.top-cta-btn {
+  background: #fff;
+  color: var(--gold-deep);
+  border: none;
+  border-radius: 999px;
+  padding: 9px 22px;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  animation: pulso 1.6s ease-in-out infinite;
+}
+@keyframes pulso {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.top-cta-close {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+/* ===== Botón de música ===== */
+.music-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 45;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: var(--gold);
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(120, 110, 90, 0.4);
+  transition: transform 0.15s ease;
+}
+.music-toggle:hover { transform: scale(1.08); }
+
+/* ===== Cuenta regresiva ===== */
+.countdown {
+  text-align: center;
+  margin: 30px auto 6px;
+}
+.cd-label {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.25rem;
+  color: var(--gold-deep);
+  margin-bottom: 12px;
+}
+.cd-grid {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.cd-item {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(120, 110, 90, 0.12);
+  padding: 14px 6px;
+  min-width: 66px;
+}
+.cd-num {
+  display: block;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.cd-unit {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink-soft);
+}
+.cd-final {
+  font-family: "Great Vibes", cursive;
+  font-size: 2rem;
+  color: var(--gold-deep);
+}
+
 /* ===== Portada: invitación original ===== */
 .hero {
   max-width: 720px;
@@ -392,6 +501,82 @@ main {
   font-family: "Great Vibes", cursive;
   font-size: 2.1rem;
   color: var(--ink);
+}
+
+/* ===== Botones de pago en línea (Clip) ===== */
+.pay-block {
+  margin-top: 26px;
+}
+.pay-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  max-width: 340px;
+  margin: 10px auto 0;
+}
+.pay-btn {
+  display: block;
+  padding: 13px 10px;
+  background: #fff;
+  color: var(--gold-deep);
+  border: 1.5px solid var(--gold);
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.pay-btn:hover {
+  background: var(--gold);
+  color: #fff;
+  transform: translateY(-2px);
+}
+.pay-other {
+  max-width: 340px;
+  margin: 10px auto 0;
+  background: var(--gold);
+  color: #fff;
+}
+.pay-other:hover {
+  background: var(--gold-deep);
+}
+
+/* ===== Botón "No podré asistir" ===== */
+.btn-decline {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 24px;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1.5px solid #d8d0c0;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.btn-decline:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+.btn-decline:disabled { opacity: 0.6; cursor: default; }
+
+/* ===== Popup de agradecimiento ===== */
+.thanks-modal {
+  text-align: center;
+  padding: 36px 28px 30px;
+}
+.thanks-emoji {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+.thanks-text {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.5rem;
+  color: var(--ink);
+  line-height: 1.4;
 }
 
 /* ===== Animación de aparición ===== */

@@ -2,29 +2,27 @@
  * Bautizo de José Antonio — Backend de confirmaciones (RSVP)
  * Guarda las confirmaciones en una hoja de Google y permite leerlas.
  *
- * Cómo instalarlo (una sola vez):
- *  1. Entra a https://sheets.google.com y crea una hoja nueva
- *     (puedes llamarla "Confirmaciones Bautizo").
- *  2. En el menú: Extensiones → Apps Script.
- *  3. Borra lo que venga y pega TODO este archivo. Guarda (icono de disquete).
- *  4. Arriba a la derecha: Implementar → Nueva implementación.
- *     - Tipo: "Aplicación web".
- *     - Ejecutar como: "Yo".
- *     - Quién tiene acceso: "Cualquier usuario".
- *     - Clic en "Implementar" y autoriza los permisos.
- *  5. Copia la "URL de la aplicación web" (termina en /exec) y envíamela.
+ * Para ACTUALIZAR cuando ya lo tenías instalado:
+ *  1. Abre tu hoja → Extensiones → Apps Script.
+ *  2. Borra todo y pega este archivo. Guarda.
+ *  3. Implementar → Gestionar implementaciones → ✏️ (editar) →
+ *     Versión: "Nueva versión" → Implementar.  (La URL NO cambia.)
  */
 
 const SHEET_NAME = 'Invitados';
+const HEADERS = ['Fecha', 'Nombre', 'Asistencia', 'Personas', 'Acompañantes', 'Mensaje'];
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const sheet = getSheet_();
+    const asistencia = (String(data.asistencia).toLowerCase() === 'no') ? 'No' : 'Sí';
     sheet.appendRow([
       new Date(),
       String(data.nombre || '').slice(0, 80),
-      Number(data.personas) || 1,
+      asistencia,
+      Number(data.personas) || 0,
+      String(data.acompanantes || '').slice(0, 400),
       String(data.mensaje || '').slice(0, 200)
     ]);
     return json_({ ok: true });
@@ -37,18 +35,22 @@ function doGet(e) {
   const sheet = getSheet_();
   const values = sheet.getDataRange().getValues();
   const rows = values.slice(1).map(function (r) {
-    return { fecha: r[0], nombre: r[1], personas: r[2], mensaje: r[3] };
+    return {
+      fecha: r[0],
+      nombre: r[1],
+      asistencia: r[2] || 'Sí',
+      personas: r[3],
+      acompanantes: r[4] || '',
+      mensaje: r[5] || ''
+    };
   });
   const payload = JSON.stringify({ ok: true, invitados: rows });
-
   const cb = e && e.parameter && e.parameter.callback;
   if (cb) {
-    return ContentService
-      .createTextOutput(cb + '(' + payload + ')')
+    return ContentService.createTextOutput(cb + '(' + payload + ')')
       .setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
-  return ContentService
-    .createTextOutput(payload)
+  return ContentService.createTextOutput(payload)
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -57,13 +59,12 @@ function getSheet_() {
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow(['Fecha', 'Nombre', 'Personas', 'Mensaje']);
   }
+  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   return sheet;
 }
 
 function json_(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
+  return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
