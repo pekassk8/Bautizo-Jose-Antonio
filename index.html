@@ -162,7 +162,14 @@
 
         <label class="field">
           <span class="field-label">¿Cuántas personas asisten?</span>
-          <input type="number" id="rsvp-personas" min="1" max="10" value="1" inputmode="numeric" />
+          <select id="rsvp-personas">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
         </label>
 
         <div id="acomp-fields"></div>
@@ -285,7 +292,7 @@
     const acompWrap = document.getElementById('acomp-fields');
     const ordinales = ['', '', 'segunda', 'tercera', 'cuarta', 'quinta', 'sexta', 'séptima', 'octava', 'novena', 'décima'];
     function renderAcomp() {
-      const n = Math.max(1, Math.min(10, parseInt(personasInput.value, 10) || 1));
+      const n = Math.max(1, Math.min(6, parseInt(personasInput.value, 10) || 1));
       acompWrap.innerHTML = '';
       for (let i = 2; i <= n; i++) {
         const lab = document.createElement('label'); lab.className = 'field';
@@ -300,6 +307,7 @@
       document.getElementById('rsvp-decline').textContent = plural ? 'No podremos asistir 🙏' : 'No podré asistir 🙏';
     }
     personasInput.addEventListener('input', renderAcomp);
+    personasInput.addEventListener('change', renderAcomp);
 
     // ====== Confirmar asistencia (RSVP) ======
     const ENDPOINT = window.RSVP_ENDPOINT || '';
@@ -326,7 +334,7 @@
         statusEl.className = 'rsvp-status err';
         return;
       }
-      const cuantos = Math.max(1, Math.min(10, parseInt(personasInput.value, 10) || 1));
+      const cuantos = Math.max(1, Math.min(6, parseInt(personasInput.value, 10) || 1));
       const plural = cuantos >= 2;
       const personas = cuantos;
       const nombresAcomp = Array.prototype.slice.call(document.querySelectorAll('.acomp-input'))
