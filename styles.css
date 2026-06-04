@@ -272,6 +272,16 @@ main {
   color: var(--ink);
   margin-top: 4px;
 }
+.gift-pair {
+  margin-top: 14px;
+}
+.gift-tag {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--ink-soft);
+  margin-right: 4px;
+}
 
 .copy-btn {
   margin-top: 10px;
