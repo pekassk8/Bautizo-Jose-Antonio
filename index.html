@@ -102,6 +102,37 @@
       </div>
     </section>
 
+    <div class="ornament reveal" aria-hidden="true">✦</div>
+
+    <!-- ===== Confirmar asistencia (RSVP) ===== -->
+    <section class="rsvp reveal">
+      <h2 class="block-title">Confirma tu asistencia</h2>
+      <p class="rsvp-intro">Nos encantaría contar contigo 🕊️</p>
+
+      <form id="rsvp-form" class="rsvp-form" autocomplete="off">
+        <label class="field">
+          <span class="field-label">Tu nombre</span>
+          <input type="text" id="rsvp-nombre" maxlength="80" required placeholder="Nombre y apellido" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">¿Cuántas personas asisten?</span>
+          <input type="number" id="rsvp-personas" min="1" max="20" value="1" inputmode="numeric" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">Mensaje (opcional)</span>
+          <input type="text" id="rsvp-mensaje" maxlength="200" placeholder="Un mensaje para la familia" />
+        </label>
+
+        <button type="submit" class="btn-primary" id="rsvp-submit">Confirmar asistencia</button>
+      </form>
+
+      <p id="rsvp-status" class="rsvp-status" role="status" aria-live="polite"></p>
+
+      <button type="button" id="ver-invitados-btn" class="btn-ghost">Ver invitados</button>
+    </section>
+
   </main>
 
   <!-- ===== Pie ===== -->
@@ -109,6 +140,28 @@
     <p class="footer-family">Familia Farah Cervera</p>
   </footer>
 
+  <!-- ===== Ventana privada: lista de invitados ===== -->
+  <div id="overlay" class="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" id="modal-close" aria-label="Cerrar">×</button>
+
+      <div id="pass-step">
+        <h3 id="modal-title" class="modal-title">Acceso privado</h3>
+        <p class="modal-text">Ingresa el código para ver la lista de invitados.</p>
+        <input type="password" id="pass-input" inputmode="numeric" placeholder="Código" autocomplete="off" />
+        <button class="btn-primary" id="pass-submit">Entrar</button>
+        <p id="pass-error" class="pass-error" aria-live="polite"></p>
+      </div>
+
+      <div id="list-step" hidden>
+        <h3 class="modal-title">Invitados confirmados</h3>
+        <p id="list-total" class="list-total"></p>
+        <ul id="list-ul" class="list-ul"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
   <script>
     // Copiar datos bancarios al portapapeles
     function copiar(texto, btn) {
@@ -137,6 +190,149 @@
       t.select();
       try { document.execCommand('copy'); cb(); } catch (e) {}
       document.body.removeChild(t);
+    }
+
+    // ===== Confirmar asistencia (RSVP) =====
+    const ENDPOINT = window.RSVP_ENDPOINT || '';
+    // Candado del código de acceso (SHA-256 de "1326"). El código no aparece en el código fuente.
+    const CODIGO_HASH = '32718321fcedd1bcfbef86cac61aa50938668428fddd0e5810c97b3574f2e070';
+
+    const form = document.getElementById('rsvp-form');
+    const statusEl = document.getElementById('rsvp-status');
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      const nombre = document.getElementById('rsvp-nombre').value.trim();
+      const personas = document.getElementById('rsvp-personas').value || 1;
+      const mensaje = document.getElementById('rsvp-mensaje').value.trim();
+      if (!nombre) return;
+      if (!ENDPOINT) {
+        statusEl.textContent = 'El formulario aún no está disponible. Inténtalo más tarde 🙏';
+        statusEl.className = 'rsvp-status err';
+        return;
+      }
+      const btn = document.getElementById('rsvp-submit');
+      btn.disabled = true;
+      statusEl.textContent = 'Enviando…';
+      statusEl.className = 'rsvp-status';
+
+      fetch(ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ nombre: nombre, personas: personas, mensaje: mensaje })
+      }).then(function () {
+        statusEl.textContent = '¡Gracias, ' + nombre.split(' ')[0] + '! Tu asistencia quedó confirmada 🎉';
+        statusEl.className = 'rsvp-status ok';
+        form.reset();
+        document.getElementById('rsvp-personas').value = 1;
+      }).catch(function () {
+        statusEl.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.';
+        statusEl.className = 'rsvp-status err';
+      }).finally(function () {
+        btn.disabled = false;
+      });
+    });
+
+    // ----- Ventana privada "Ver invitados" -----
+    const overlay = document.getElementById('overlay');
+    const passStep = document.getElementById('pass-step');
+    const listStep = document.getElementById('list-step');
+    const passInput = document.getElementById('pass-input');
+    const passError = document.getElementById('pass-error');
+
+    function abrirOverlay() {
+      passStep.hidden = false;
+      listStep.hidden = true;
+      passError.textContent = '';
+      passInput.value = '';
+      overlay.hidden = false;
+      setTimeout(function () { passInput.focus(); }, 50);
+    }
+    function cerrarOverlay() { overlay.hidden = true; }
+
+    document.getElementById('ver-invitados-btn').addEventListener('click', abrirOverlay);
+    document.getElementById('modal-close').addEventListener('click', cerrarOverlay);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) cerrarOverlay(); });
+
+    async function sha256Hex(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+
+    document.getElementById('pass-submit').addEventListener('click', verificarCodigo);
+    passInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') verificarCodigo(); });
+
+    async function verificarCodigo() {
+      passError.textContent = '';
+      const intento = passInput.value.trim();
+      if (!intento) return;
+      let hash;
+      try { hash = await sha256Hex(intento); } catch (e) { hash = ''; }
+      if (hash !== CODIGO_HASH) {
+        passError.textContent = 'Código incorrecto.';
+        passInput.value = '';
+        return;
+      }
+      mostrarLista();
+    }
+
+    function cargarInvitados() {
+      return new Promise(function (resolve, reject) {
+        if (!ENDPOINT) return reject('no-config');
+        const cb = 'cb_' + Date.now();
+        const s = document.createElement('script');
+        window[cb] = function (data) {
+          try { delete window[cb]; } catch (e) {}
+          s.remove();
+          resolve(data);
+        };
+        s.onerror = function () { s.remove(); reject('error'); };
+        s.src = ENDPOINT + '?callback=' + cb + '&t=' + Date.now();
+        document.body.appendChild(s);
+      });
+    }
+
+    async function mostrarLista() {
+      passStep.hidden = true;
+      listStep.hidden = false;
+      const totalEl = document.getElementById('list-total');
+      const ul = document.getElementById('list-ul');
+      totalEl.textContent = 'Cargando…';
+      ul.innerHTML = '';
+      try {
+        const data = await cargarInvitados();
+        const inv = (data && data.invitados) || [];
+        if (!inv.length) {
+          totalEl.textContent = 'Aún no hay confirmaciones.';
+          return;
+        }
+        let totalPersonas = 0;
+        inv.forEach(function (g) {
+          totalPersonas += Number(g.personas) || 1;
+          const li = document.createElement('li');
+          const n = document.createElement('span');
+          n.className = 'li-nombre';
+          n.textContent = g.nombre || '(sin nombre)';
+          const p = document.createElement('span');
+          p.className = 'li-personas';
+          p.textContent = (Number(g.personas) || 1) + (Number(g.personas) === 1 ? ' persona' : ' personas');
+          li.appendChild(n);
+          li.appendChild(p);
+          if (g.mensaje) {
+            const m = document.createElement('span');
+            m.className = 'li-mensaje';
+            m.textContent = '“' + g.mensaje + '”';
+            li.appendChild(m);
+          }
+          ul.appendChild(li);
+        });
+        totalEl.textContent = inv.length + ' confirmaciones · ' + totalPersonas + ' personas en total';
+      } catch (e) {
+        totalEl.textContent = (e === 'no-config')
+          ? 'El formulario aún no está configurado.'
+          : 'No se pudo cargar la lista. Inténtalo de nuevo.';
+      }
     }
 
     // Aparición suave al hacer scroll
