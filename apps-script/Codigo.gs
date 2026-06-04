@@ -31,7 +31,18 @@ function doPost(e) {
     let nombres = Array.isArray(data.nombres)
       ? data.nombres.map(function (n) { return String(n).trim(); }).filter(Boolean)
       : [];
-    if (!nombres.length) { nombres = [String(data.nombre || '').trim()]; }
+    if (!nombres.length) {
+      // Respaldo para versiones antiguas del formulario (nombre + acompañantes)
+      nombres = [];
+      if (data.nombre) { nombres.push(String(data.nombre).trim()); }
+      if (data.acompanantes) {
+        String(data.acompanantes).split(',').forEach(function (s) {
+          s = s.trim(); if (s) { nombres.push(s); }
+        });
+      }
+      nombres = nombres.filter(Boolean);
+      if (!nombres.length) { nombres = ['']; }
+    }
     const cantidad = Number(data.personas) || nombres.length || 1;
 
     const sheet = getSheet_(noAsiste ? HOJA_NO : HOJA_SI);

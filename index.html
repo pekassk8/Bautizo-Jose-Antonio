@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Bautizo de José Antonio</title>
   <meta name="description" content="Invitación al bautizo de José Antonio — 27 de junio de 2026, Parroquia Villa de Guadalupe." />
 
@@ -357,20 +360,20 @@
     function mostrarThanks(asistencia, nombres, plural) {
       const emoji = document.getElementById('thanks-emoji');
       const txt = document.getElementById('thanks-text');
-      const firsts = (nombres || []).filter(Boolean).map(function (n) { return n.split(' ')[0]; });
+      const limpios = (nombres || []).filter(Boolean).map(function (n) { return n.trim(); });
       if (asistencia === 'No') {
         emoji.textContent = '🙏';
-        const quien = firsts[0] ? (', ' + firsts[0]) : '';
+        const quien = limpios[0] ? (', ' + limpios[0].split(' ')[0]) : '';
         txt.textContent = '¡Gracias por avisar' + quien + '! ' + (plural ? 'Los' : 'Te') + ' vamos a extrañar.';
         thanksOverlay.hidden = false;
         return;
       }
       emoji.textContent = '🎉';
       let saludo;
-      if (firsts.length >= 2) {
-        saludo = '¡Gracias ' + firsts.slice(0, -1).join(', gracias ') + ' y gracias ' + firsts[firsts.length - 1] + '!';
+      if (limpios.length >= 2) {
+        saludo = '¡Gracias ' + limpios.slice(0, -1).join(', gracias ') + ' y gracias ' + limpios[limpios.length - 1] + '!';
       } else {
-        saludo = '¡Gracias, ' + (firsts[0] || '') + '!';
+        saludo = '¡Gracias, ' + (limpios[0] || '') + '!';
       }
       txt.textContent = saludo + ' ' + (plural ? 'Su' : 'Tu') + ' asistencia quedó confirmada 🎉';
       thanksOverlay.hidden = false;
