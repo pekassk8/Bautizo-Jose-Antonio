@@ -46,13 +46,9 @@ function doPost(e) {
     const cantidad = Number(data.personas) || nombres.length || 1;
 
     const sheet = getSheet_(noAsiste ? HOJA_NO : HOJA_SI);
-    if (noAsiste) {
-      sheet.appendRow([fecha, nombres[0].slice(0, 80), '', mensaje]);
-    } else {
-      nombres.forEach(function (nm, idx) {
-        sheet.appendRow([fecha, nm.slice(0, 80), idx === 0 ? cantidad : '', mensaje]);
-      });
-    }
+    nombres.forEach(function (nm, idx) {
+      sheet.appendRow([fecha, nm.slice(0, 80), idx === 0 ? cantidad : '', mensaje]);
+    });
     return json_({ ok: true });
   } catch (err) {
     return json_({ ok: false, error: String(err) });

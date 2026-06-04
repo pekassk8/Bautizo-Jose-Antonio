@@ -328,13 +328,10 @@
       }
       const cuantos = Math.max(1, Math.min(10, parseInt(personasInput.value, 10) || 1));
       const plural = cuantos >= 2;
-      let personas = 0, acompanantes = '', nombresAcomp = [];
-      if (asistencia === 'Sí') {
-        personas = cuantos;
-        nombresAcomp = Array.prototype.slice.call(document.querySelectorAll('.acomp-input'))
-          .map(function (i) { return i.value.trim(); }).filter(Boolean);
-        acompanantes = nombresAcomp.join(', ');
-      }
+      const personas = cuantos;
+      const nombresAcomp = Array.prototype.slice.call(document.querySelectorAll('.acomp-input'))
+        .map(function (i) { return i.value.trim(); }).filter(Boolean);
+      const acompanantes = nombresAcomp.join(', ');
       const todosNombres = [nombre].concat(nombresAcomp);
       btnSi.disabled = true; btnNo.disabled = true;
       statusEl.textContent = 'Enviando…'; statusEl.className = 'rsvp-status';
@@ -441,21 +438,20 @@
         const grupos = inv.filter(tieneCantidad).length;
         totalEl.textContent = grupos + ' confirmaciones · ' + inv.length + ' personas' + (no.length ? '  ·  ' + no.length + ' no asistirán' : '');
 
-        function pinta(g, decline) {
+        function pinta(g) {
           const li = document.createElement('li');
-          const esAcomp = !decline && !tieneCantidad(g);
+          const esAcomp = !tieneCantidad(g);
           const n = document.createElement('span'); n.className = 'li-nombre';
           n.textContent = (esAcomp ? '↳ ' : '') + (g.invitado || g.nombre || '(sin nombre)');
           li.appendChild(n);
-          if (decline) { const p = document.createElement('span'); p.className = 'li-personas'; p.textContent = 'No asistirá'; li.appendChild(p); }
           if (g.mensaje && !esAcomp) { const m = document.createElement('span'); m.className = 'li-mensaje'; m.textContent = '“' + g.mensaje + '”'; li.appendChild(m); }
           ul.appendChild(li);
         }
-        inv.forEach(function (g) { pinta(g, false); });
+        inv.forEach(pinta);
         if (no.length) {
           const sep = document.createElement('li'); sep.className = 'li-sep'; sep.textContent = 'No asistirán';
           ul.appendChild(sep);
-          no.forEach(function (g) { pinta(g, true); });
+          no.forEach(pinta);
         }
       } catch (e) {
         totalEl.textContent = (e === 'no-config') ? 'El formulario aún no está configurado.' : 'No se pudo cargar la lista. Inténtalo de nuevo.';
