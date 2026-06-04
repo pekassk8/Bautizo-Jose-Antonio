@@ -323,13 +323,16 @@
         statusEl.className = 'rsvp-status err';
         return;
       }
-      let personas = 0, acompanantes = '';
+      const cuantos = Math.max(1, Math.min(10, parseInt(personasInput.value, 10) || 1));
+      const plural = cuantos >= 2;
+      let personas = 0, acompanantes = '', nombresAcomp = [];
       if (asistencia === 'Sí') {
-        personas = Math.max(1, Math.min(10, parseInt(personasInput.value, 10) || 1));
-        const nombres = Array.prototype.slice.call(document.querySelectorAll('.acomp-input'))
+        personas = cuantos;
+        nombresAcomp = Array.prototype.slice.call(document.querySelectorAll('.acomp-input'))
           .map(function (i) { return i.value.trim(); }).filter(Boolean);
-        acompanantes = nombres.join(', ');
+        acompanantes = nombresAcomp.join(', ');
       }
+      const todosNombres = [nombre].concat(nombresAcomp);
       btnSi.disabled = true; btnNo.disabled = true;
       statusEl.textContent = 'Enviando…'; statusEl.className = 'rsvp-status';
 
@@ -339,7 +342,7 @@
         body: JSON.stringify({ nombre: nombre, asistencia: asistencia, personas: personas, acompanantes: acompanantes, mensaje: mensaje })
       }).then(function () {
         statusEl.textContent = '';
-        mostrarThanks(asistencia, nombre);
+        mostrarThanks(asistencia, todosNombres, plural);
         form.reset(); personasInput.value = 1; renderAcomp();
       }).catch(function () {
         statusEl.textContent = 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.';
@@ -351,17 +354,25 @@
 
     // ====== Popup de agradecimiento ======
     const thanksOverlay = document.getElementById('thanks-overlay');
-    function mostrarThanks(asistencia, nombre) {
-      const first = nombre.split(' ')[0];
+    function mostrarThanks(asistencia, nombres, plural) {
       const emoji = document.getElementById('thanks-emoji');
       const txt = document.getElementById('thanks-text');
+      const firsts = (nombres || []).filter(Boolean).map(function (n) { return n.split(' ')[0]; });
       if (asistencia === 'No') {
         emoji.textContent = '🙏';
-        txt.textContent = '¡Gracias por avisar, ' + first + '! Te vamos a extrañar.';
-      } else {
-        emoji.textContent = '🎉';
-        txt.textContent = '¡Gracias, ' + first + '! Tu asistencia quedó confirmada.';
+        const quien = firsts[0] ? (', ' + firsts[0]) : '';
+        txt.textContent = '¡Gracias por avisar' + quien + '! ' + (plural ? 'Los' : 'Te') + ' vamos a extrañar.';
+        thanksOverlay.hidden = false;
+        return;
       }
+      emoji.textContent = '🎉';
+      let saludo;
+      if (firsts.length >= 2) {
+        saludo = '¡Gracias ' + firsts.slice(0, -1).join(', gracias ') + ' y gracias ' + firsts[firsts.length - 1] + '!';
+      } else {
+        saludo = '¡Gracias, ' + (firsts[0] || '') + '!';
+      }
+      txt.textContent = saludo + ' ' + (plural ? 'Su' : 'Tu') + ' asistencia quedó confirmada 🎉';
       thanksOverlay.hidden = false;
     }
     document.getElementById('thanks-close').addEventListener('click', function () { thanksOverlay.hidden = true; });
@@ -421,29 +432,29 @@
       try {
         const data = await cargarInvitados();
         const inv = (data && data.invitados) || [];
-        if (!inv.length) { totalEl.textContent = 'Aún no hay confirmaciones.'; return; }
-        const si = inv.filter(function (g) { return String(g.asistencia || 'Sí') !== 'No'; });
-        const no = inv.filter(function (g) { return String(g.asistencia || 'Sí') === 'No'; });
-        let totalP = 0; si.forEach(function (g) { totalP += Number(g.personas) || 1; });
-        totalEl.textContent = si.length + ' confirmados · ' + totalP + ' personas' + (no.length ? '  ·  ' + no.length + ' no asistirán' : '');
+        const no = (data && data.noAsistiran) || [];
+        if (!inv.length && !no.length) { totalEl.textContent = 'Aún no hay confirmaciones.'; return; }
+        let totalP = 0;
+        inv.forEach(function (g) {
+          const nombres = String(g.invitado || g.nombre || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+          totalP += (nombres.length || 1);
+        });
+        totalEl.textContent = inv.length + ' confirmaciones · ' + totalP + ' personas' + (no.length ? '  ·  ' + no.length + ' no asistirán' : '');
 
         function pinta(g, decline) {
           const li = document.createElement('li');
-          const n = document.createElement('span'); n.className = 'li-nombre'; n.textContent = g.nombre || '(sin nombre)';
+          const n = document.createElement('span'); n.className = 'li-nombre'; n.textContent = g.invitado || g.nombre || '(sin nombre)';
           li.appendChild(n);
-          const p = document.createElement('span'); p.className = 'li-personas';
-          if (decline) { p.textContent = 'No asistirá'; }
-          else {
-            const np = Number(g.personas) || 1;
-            p.textContent = np + (np === 1 ? ' persona' : ' personas');
-            if (g.acompanantes) p.textContent += ' · con: ' + g.acompanantes;
-          }
-          li.appendChild(p);
+          if (decline) { const p = document.createElement('span'); p.className = 'li-personas'; p.textContent = 'No asistirá'; li.appendChild(p); }
           if (g.mensaje) { const m = document.createElement('span'); m.className = 'li-mensaje'; m.textContent = '“' + g.mensaje + '”'; li.appendChild(m); }
           ul.appendChild(li);
         }
-        si.forEach(function (g) { pinta(g, false); });
-        no.forEach(function (g) { pinta(g, true); });
+        inv.forEach(function (g) { pinta(g, false); });
+        if (no.length) {
+          const sep = document.createElement('li'); sep.className = 'li-sep'; sep.textContent = 'No asistirán';
+          ul.appendChild(sep);
+          no.forEach(function (g) { pinta(g, true); });
+        }
       } catch (e) {
         totalEl.textContent = (e === 'no-config') ? 'El formulario aún no está configurado.' : 'No se pudo cargar la lista. Inténtalo de nuevo.';
       }
