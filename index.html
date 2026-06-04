@@ -133,7 +133,7 @@
       </div>
 
       <div class="gift-block pay-block">
-        <p class="gift-label">O paga en línea con tarjeta</p>
+        <p class="gift-label">O en línea con tarjeta</p>
         <div class="pay-grid">
           <a class="pay-btn" href="https://pago.clip.mx/v3/22935e50-c5b5-4dbd-8c3d-03059c264c3c" target="_blank" rel="noopener">$100</a>
           <a class="pay-btn" href="https://pago.clip.mx/v3/6c2e1e63-6dca-421d-8a81-3687c3490253" target="_blank" rel="noopener">$200</a>
@@ -309,7 +309,12 @@
     function enviar(asistencia) {
       const nombre = document.getElementById('rsvp-nombre').value.trim();
       const mensaje = document.getElementById('rsvp-mensaje').value.trim();
-      if (!nombre) { document.getElementById('rsvp-nombre').focus(); return; }
+      if (!nombre) {
+        statusEl.textContent = 'Favor de poner tu nombre 🙏';
+        statusEl.className = 'rsvp-status err';
+        document.getElementById('rsvp-nombre').focus();
+        return;
+      }
       if (!ENDPOINT) {
         statusEl.textContent = 'El formulario aún no está disponible. Inténtalo más tarde 🙏';
         statusEl.className = 'rsvp-status err';
