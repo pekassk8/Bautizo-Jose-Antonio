@@ -339,7 +339,7 @@
       fetch(ENDPOINT, {
         method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ nombre: nombre, asistencia: asistencia, personas: personas, acompanantes: acompanantes, mensaje: mensaje })
+        body: JSON.stringify({ nombre: nombre, asistencia: asistencia, personas: personas, acompanantes: acompanantes, nombres: todosNombres, mensaje: mensaje })
       }).then(function () {
         statusEl.textContent = '';
         mostrarThanks(asistencia, todosNombres, plural);
@@ -434,19 +434,18 @@
         const inv = (data && data.invitados) || [];
         const no = (data && data.noAsistiran) || [];
         if (!inv.length && !no.length) { totalEl.textContent = 'Aún no hay confirmaciones.'; return; }
-        let totalP = 0;
-        inv.forEach(function (g) {
-          const nombres = String(g.invitado || g.nombre || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
-          totalP += (nombres.length || 1);
-        });
-        totalEl.textContent = inv.length + ' confirmaciones · ' + totalP + ' personas' + (no.length ? '  ·  ' + no.length + ' no asistirán' : '');
+        function tieneCantidad(g) { return g.cantidad !== '' && g.cantidad !== null && g.cantidad !== undefined; }
+        const grupos = inv.filter(tieneCantidad).length;
+        totalEl.textContent = grupos + ' confirmaciones · ' + inv.length + ' personas' + (no.length ? '  ·  ' + no.length + ' no asistirán' : '');
 
         function pinta(g, decline) {
           const li = document.createElement('li');
-          const n = document.createElement('span'); n.className = 'li-nombre'; n.textContent = g.invitado || g.nombre || '(sin nombre)';
+          const esAcomp = !decline && !tieneCantidad(g);
+          const n = document.createElement('span'); n.className = 'li-nombre';
+          n.textContent = (esAcomp ? '↳ ' : '') + (g.invitado || g.nombre || '(sin nombre)');
           li.appendChild(n);
           if (decline) { const p = document.createElement('span'); p.className = 'li-personas'; p.textContent = 'No asistirá'; li.appendChild(p); }
-          if (g.mensaje) { const m = document.createElement('span'); m.className = 'li-mensaje'; m.textContent = '“' + g.mensaje + '”'; li.appendChild(m); }
+          if (g.mensaje && !esAcomp) { const m = document.createElement('span'); m.className = 'li-mensaje'; m.textContent = '“' + g.mensaje + '”'; li.appendChild(m); }
           ul.appendChild(li);
         }
         inv.forEach(function (g) { pinta(g, false); });

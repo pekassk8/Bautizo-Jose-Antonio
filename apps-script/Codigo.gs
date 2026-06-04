@@ -1,12 +1,16 @@
 /**
  * Bautizo de José Antonio — Backend de confirmaciones (RSVP)
  *
- * Guarda en dos hojas:
+ * Hojas:
  *   - "Invitados"     → los que SÍ asistirán
  *   - "No asistirán"  → los que NO podrán asistir
- * Columnas en ambas: Fecha | Invitado | Mensaje para la familia
+ * Columnas: Fecha | Invitado | Cantidad | Mensaje para la familia
  *
- * Para ACTUALIZAR si ya lo tenías:
+ * Cada persona se guarda en su propia fila. La "Cantidad" solo aparece
+ * en la primera persona del grupo (la cabeza de familia); en los demás
+ * acompañantes se deja en blanco para saber que van juntos.
+ *
+ * Para ACTUALIZAR:
  *  1. Abre tu hoja → Extensiones → Apps Script.
  *  2. Borra todo y pega este archivo. Guarda.
  *  3. Implementar → Gestionar implementaciones → ✏️ (editar) →
@@ -15,20 +19,29 @@
 
 const HOJA_SI = 'Invitados';
 const HOJA_NO = 'No asistirán';
-const HEADERS = ['Fecha', 'Invitado', 'Mensaje para la familia'];
+const HEADERS = ['Fecha', 'Invitado', 'Cantidad', 'Mensaje para la familia'];
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const noAsiste = (String(data.asistencia).toLowerCase() === 'no');
+    const fecha = new Date();
+    const mensaje = String(data.mensaje || '').slice(0, 200);
 
-    let invitado = String(data.nombre || '').slice(0, 80);
-    if (data.acompanantes) {
-      invitado += ', ' + String(data.acompanantes).slice(0, 400);
-    }
+    let nombres = Array.isArray(data.nombres)
+      ? data.nombres.map(function (n) { return String(n).trim(); }).filter(Boolean)
+      : [];
+    if (!nombres.length) { nombres = [String(data.nombre || '').trim()]; }
+    const cantidad = Number(data.personas) || nombres.length || 1;
 
     const sheet = getSheet_(noAsiste ? HOJA_NO : HOJA_SI);
-    sheet.appendRow([new Date(), invitado, String(data.mensaje || '').slice(0, 200)]);
+    if (noAsiste) {
+      sheet.appendRow([fecha, nombres[0].slice(0, 80), '', mensaje]);
+    } else {
+      nombres.forEach(function (nm, idx) {
+        sheet.appendRow([fecha, nm.slice(0, 80), idx === 0 ? cantidad : '', mensaje]);
+      });
+    }
     return json_({ ok: true });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
@@ -54,7 +67,7 @@ function leer_(nombreHoja) {
   const sheet = getSheet_(nombreHoja);
   const values = sheet.getDataRange().getValues();
   return values.slice(1).map(function (r) {
-    return { fecha: r[0], invitado: r[1], mensaje: r[2] || '' };
+    return { fecha: r[0], invitado: r[1], cantidad: (r[2] === '' ? '' : r[2]), mensaje: r[3] || '' };
   });
 }
 
