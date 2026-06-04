@@ -292,6 +292,9 @@
         inp.type = 'text'; inp.maxLength = 80; inp.className = 'acomp-input'; inp.placeholder = 'Nombre';
         lab.appendChild(sp); lab.appendChild(inp); acompWrap.appendChild(lab);
       }
+      const plural = n >= 2;
+      document.getElementById('rsvp-submit').textContent = plural ? 'Sí, asistiremos 🎉' : 'Sí, asistiré 🎉';
+      document.getElementById('rsvp-decline').textContent = plural ? 'No podremos asistir 🙏' : 'No podré asistir 🙏';
     }
     personasInput.addEventListener('input', renderAcomp);
 
