@@ -179,10 +179,6 @@
           <select id="rsvp-personas">
             <option value="1">1</option>
             <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
           </select>
         </label>
 
@@ -306,7 +302,7 @@
     const acompWrap = document.getElementById('acomp-fields');
     const ordinales = ['', '', 'segunda', 'tercera', 'cuarta', 'quinta', 'sexta', 'séptima', 'octava', 'novena', 'décima'];
     function renderAcomp() {
-      const n = Math.max(1, Math.min(6, parseInt(personasInput.value, 10) || 1));
+      const n = Math.max(1, Math.min(2, parseInt(personasInput.value, 10) || 1));
       acompWrap.innerHTML = '';
       for (let i = 2; i <= n; i++) {
         const lab = document.createElement('label'); lab.className = 'field';
@@ -348,7 +344,7 @@
         statusEl.className = 'rsvp-status err';
         return;
       }
-      const cuantos = Math.max(1, Math.min(6, parseInt(personasInput.value, 10) || 1));
+      const cuantos = Math.max(1, Math.min(2, parseInt(personasInput.value, 10) || 1));
       const plural = cuantos >= 2;
       const personas = cuantos;
       const nombresAcomp = Array.prototype.slice.call(document.querySelectorAll('.acomp-input'))
